@@ -6,7 +6,7 @@ import {
   imageOverlay,
   headingText,
 } from "./Hero.css";
-import image from "../../../assets/images/rox.jpeg";
+import image from "../../../../public/assets/images/rox.jpeg";
 import { Links } from "../../layout/call-to-action/Links";
 
 export const Hero = () => {
