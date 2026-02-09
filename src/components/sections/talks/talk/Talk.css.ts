@@ -10,7 +10,10 @@ import {
 } from "../../../../ui/tokens/theme";
 
 export const talkArticle = style({
+  display: "flex",
+  flexDirection: "column",
   width: cardSizes.md.width,
+  height: "100%",
   padding: `${spacing[4]} ${spacing[4]}`,
   backgroundColor: colors.background.surface,
   borderRadius: radii.lg,
@@ -23,10 +26,16 @@ export const talkArticle = style({
     boxShadow: shadows.glow,
     borderColor: colors.accent.highlight,
   },
+  "@media": {
+    "(max-width: 768px)": {
+      width: "100%",
+    },
+  },
 });
 
 export const talkVideo = style({
-  width: cardSizes.md.width,
+  width: "100%",
+  aspectRatio: "16 / 9",
 });
 
 export const talkParagraphs = style({

@@ -10,6 +10,7 @@ export const nav = style({
   justifyContent: "center",
   alignItems: "center",
   gap: spacing[3],
+  flexWrap: "wrap",
 });
 
 export const link = style({
@@ -19,6 +20,12 @@ export const link = style({
   padding: `${spacing[4]} ${spacing[9]}`,
   fontSize: typography.fontSize.xl,
   transition: "transform 0.15s ease, box-shadow 0.15s ease",
+  "@media": {
+    "(max-width: 768px)": {
+      padding: `${spacing[3]} ${spacing[5]}`,
+      fontSize: typography.fontSize.md,
+    },
+  },
 
   selectors: {
     "&:hover": {

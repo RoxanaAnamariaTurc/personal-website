@@ -13,6 +13,7 @@ export const projectCard = style({
   display: "flex",
   flexDirection: "column",
   width: cardSizes.md.width,
+  height: "100%",
   backgroundColor: colors.background.surface,
   borderRadius: radii.lg,
   border: `1px solid ${colors.border.subtle}`,
@@ -23,6 +24,11 @@ export const projectCard = style({
     transform: "translateY(-4px)",
     boxShadow: shadows.glow,
     borderColor: colors.accent.highlight,
+  },
+  "@media": {
+    "(max-width: 768px)": {
+      width: "100%",
+    },
   },
 });
 
@@ -50,6 +56,7 @@ export const detailsCard = style({
   flexDirection: "column",
   gap: spacing[3],
   padding: spacing[5],
+  flex: 1,
 });
 
 export const projectTitle = style({
@@ -92,7 +99,8 @@ export const techTag = style({
 export const cardActions = style({
   display: "flex",
   gap: spacing[3],
-  marginTop: spacing[2],
+  marginTop: "auto",
+  paddingTop: spacing[3],
 });
 
 export const actionButton = style({

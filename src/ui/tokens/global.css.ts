@@ -2,6 +2,10 @@ import { globalStyle } from "@vanilla-extract/css";
 import { typography } from "./theme";
 globalStyle("body", { margin: 0, padding: 0 });
 
+globalStyle("*, *::before, *::after", {
+  boxSizing: "border-box",
+});
+
 globalStyle("h1, h2, h3, h4, h5, h6", {
   margin: 0,
 });

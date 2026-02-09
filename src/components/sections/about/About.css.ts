@@ -5,10 +5,17 @@ export const aboutSection = style({
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
-  height: layout.section.md,
+  minHeight: layout.section.md,
   clipPath: "polygon(0 50%, 100% 0, 100% 70%, 0 70%)",
   padding: spacing[4],
   backgroundColor: colors.background.surface,
+  "@media": {
+    "(max-width: 768px)": {
+      minHeight: "auto",
+      clipPath: "none",
+      padding: `${spacing[7]} ${spacing[4]}`,
+    },
+  },
 });
 
 export const aboutTitle = style({
@@ -18,6 +25,11 @@ export const aboutTitle = style({
   textAlign: "center",
   position: "relative",
   padding: spacing[4],
+  "@media": {
+    "(max-width: 768px)": {
+      fontSize: typography.fontSize.xxl,
+    },
+  },
   "::after": {
     content: '""',
     display: "block",

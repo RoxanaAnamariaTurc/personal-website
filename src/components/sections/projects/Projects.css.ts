@@ -6,7 +6,7 @@ export const projectsWrapper = style({
   flexDirection: "column",
   alignItems: "center",
   gap: spacing[7],
-  padding: `${spacing[8]} 0`,
+  padding: `${spacing[8]} ${spacing[4]}`,
 });
 
 export const sectionTitle = style({
@@ -15,6 +15,11 @@ export const sectionTitle = style({
   color: colors.text.primary,
   textAlign: "center",
   position: "relative",
+  "@media": {
+    "(max-width: 768px)": {
+      fontSize: typography.fontSize.xxl,
+    },
+  },
   "::after": {
     content: '""',
     display: "block",
@@ -33,4 +38,9 @@ export const projectsSection = style({
   justifyItems: "center",
   width: "100%",
   maxWidth: "1200px",
+  "@media": {
+    "(max-width: 640px)": {
+      gridTemplateColumns: "1fr",
+    },
+  },
 });

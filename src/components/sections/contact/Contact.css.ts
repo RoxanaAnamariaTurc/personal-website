@@ -13,6 +13,7 @@ export const contactMeta = style({
   gap: "6px",
   marginBottom: spacing[6],
   padding: spacing[4],
+  flexWrap: "wrap",
 });
 
 export const dot = style({
@@ -24,6 +25,11 @@ export const contactTitle = style({
   fontWeight: typography.fontWeight.bold,
   color: colors.text.primary,
   textAlign: "center",
+  "@media": {
+    "(max-width: 768px)": {
+      fontSize: typography.fontSize.xxl,
+    },
+  },
   "::after": {
     content: '""',
     display: "block",

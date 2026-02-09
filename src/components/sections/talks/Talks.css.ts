@@ -4,7 +4,7 @@ import { colors, typography, spacing } from "../../../ui/tokens/theme";
 export const talksSection = style({
   display: "flex",
   flexDirection: "column",
-  padding: `${spacing[8]} 0`,
+  padding: `${spacing[8]} ${spacing[4]}`,
   alignItems: "center",
   gap: spacing[7],
 });
@@ -14,6 +14,11 @@ export const talksTitle = style({
   fontWeight: typography.fontWeight.bold,
   color: colors.text.primary,
   textAlign: "center",
+  "@media": {
+    "(max-width: 768px)": {
+      fontSize: typography.fontSize.xxl,
+    },
+  },
   "::after": {
     content: '""',
     display: "block",
@@ -26,9 +31,16 @@ export const talksTitle = style({
 });
 
 export const talksDiv = style({
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  gap: spacing[7],
-  flexWrap: "wrap",
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+  gap: spacing[6],
+  width: "100%",
+  maxWidth: "1200px",
+  justifyItems: "start",
+  "@media": {
+    "(max-width: 640px)": {
+      gridTemplateColumns: "1fr",
+      justifyItems: "center",
+    },
+  },
 });
