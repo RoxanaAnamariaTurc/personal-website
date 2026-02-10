@@ -5,7 +5,7 @@ export type ProjectProps = {
   language?: string | null;
   topics: string[];
   html_url: string;
-  updated_at: string;
+  updated_at?: string;
   liveLink?: string;
   imgLink?: string;
 };
