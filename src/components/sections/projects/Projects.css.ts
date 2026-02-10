@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { spacing, typography, colors } from "../../../ui/tokens/theme";
+import { spacing, typography, colors, radii } from "../../../ui/tokens/theme";
 
 export const projectsWrapper = style({
   display: "flex",
@@ -41,6 +41,22 @@ export const projectsSection = style({
   "@media": {
     "(max-width: 640px)": {
       gridTemplateColumns: "1fr",
+    },
+  },
+});
+
+export const searchInput = style({
+  width: "400px",
+  border: `1px solid ${colors.border.subtle}`,
+  height: "44px",
+  backgroundColor: "transparent",
+  borderRadius: radii.sm,
+  padding: `0 ${spacing[3]}`,
+  fontSize: typography.fontSize.md,
+  color: colors.text.primary,
+  "@media": {
+    "(max-width: 640px)": {
+      width: "100%",
     },
   },
 });

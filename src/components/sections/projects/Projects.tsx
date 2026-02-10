@@ -4,11 +4,26 @@ import {
   projectOverrides,
 } from "../../../data/projectsData";
 import { Project } from "./project/Project";
-import { projectsSection, projectsWrapper, sectionTitle } from "./Projects.css";
+import { ProjectsLoading } from "./loading/ProjectsLoading";
+import {
+  projectsSection,
+  projectsWrapper,
+  sectionTitle,
+  searchInput,
+} from "./Projects.css";
 
 export const Projects = () => {
   const [projects, setProjects] = React.useState<ProjectProps[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [inputValue, setInputValue] = React.useState("");
+
+  const filteredProjects = React.useMemo(
+    () =>
+      projects.filter((project) =>
+        project.name.toLowerCase().includes(inputValue.toLowerCase()),
+      ),
+    [projects, inputValue],
+  );
 
   const fetchProjects = async () => {
     const response = await fetch(
@@ -32,9 +47,14 @@ export const Projects = () => {
           // language: repo.language,
           topics: repo.topics ?? [],
           html_url: repo.html_url,
+          updated_at: repo.updated_at,
           ...overrides,
         };
-      });
+      })
+      .sort(
+        (a: ProjectProps, b: ProjectProps) =>
+          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+      );
     setProjects(mapped);
     setLoading(false);
   };
@@ -43,14 +63,21 @@ export const Projects = () => {
     fetchProjects();
   }, []);
 
-  if (loading) return <div>Loading projects...</div>;
+  if (loading) return <ProjectsLoading />;
 
   return (
     <section id="projects" className={projectsWrapper}>
       <h2 className={sectionTitle}>Projects</h2>
-
+      <input
+        className={searchInput}
+        type="text"
+        aria-label="Search for a project"
+        placeholder="Search for a project"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+      />
       <div className={projectsSection}>
-        {projects.map((project) => (
+        {filteredProjects.map((project) => (
           <Project key={project.id} {...project} />
         ))}
       </div>
