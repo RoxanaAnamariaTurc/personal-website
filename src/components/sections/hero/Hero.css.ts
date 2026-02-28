@@ -1,5 +1,11 @@
 import { style } from "@vanilla-extract/css";
-import { layout, spacing, radii, typography } from "../../../ui/tokens/theme";
+import {
+  layout,
+  spacing,
+  radii,
+  typography,
+  colors,
+} from "../../../ui/tokens/theme";
 
 export const section = style({
   display: "grid",
@@ -24,6 +30,7 @@ export const header = style({
   flexDirection: "column",
   justifyContent: "center",
   alignItems: "center",
+  marginTop: "-20px",
 });
 
 export const headingText = style({
@@ -55,4 +62,26 @@ export const imageOverlay = style({
   background: "rgba(0, 0, 0, 0.80)",
   pointerEvents: "none",
   width: "100%",
+});
+
+export const badgesWrapper = style({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: spacing[2],
+  justifyContent: "center",
+  marginTop: spacing[3],
+});
+
+export const badge = style({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: spacing[1],
+  padding: `${spacing[1]} ${spacing[3]}`,
+  fontSize: typography.fontSize.xs,
+  fontWeight: typography.fontWeight.medium,
+  color: colors.accent.highlight,
+  backgroundColor: colors.background.surfaceAlt,
+  border: "none",
+  borderRadius: radii.md,
+  whiteSpace: "nowrap",
 });

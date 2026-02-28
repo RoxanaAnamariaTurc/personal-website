@@ -20,7 +20,9 @@ export const Projects = () => {
   const filteredProjects = React.useMemo(
     () =>
       projects.filter((project) =>
-        project.name.toLowerCase().includes(inputValue.toLowerCase()),
+        project.topics.some((topic) =>
+          topic.toLowerCase().includes(inputValue.toLowerCase()),
+        ),
       ),
     [projects, inputValue],
   );
@@ -72,8 +74,8 @@ export const Projects = () => {
       <input
         className={searchInput}
         type="text"
-        aria-label="Search for a project"
-        placeholder="Search for a project"
+        aria-label="Search for a project by technology used"
+        placeholder="Search for a project by technology used"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
       />
