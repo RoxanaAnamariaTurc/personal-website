@@ -1,8 +1,5 @@
 import { WebTracerProvider } from "@opentelemetry/sdk-trace-web";
-import {
-  SimpleSpanProcessor,
-  BatchSpanProcessor,
-} from "@opentelemetry/sdk-trace-web";
+import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-web";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import {
