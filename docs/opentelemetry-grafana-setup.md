@@ -143,13 +143,11 @@ export function initTelemetry() {
   });
 
   // Provider — manages span creation and processing
+  // Use SimpleSpanProcessor in all environments to prevent span loss
+  // on page close (BatchSpanProcessor buffers and loses unflushed spans).
   const provider = new WebTracerProvider({
     resource,
-    spanProcessors: [
-      import.meta.env.DEV
-        ? new SimpleSpanProcessor(traceExporter)
-        : new BatchSpanProcessor(traceExporter),
-    ],
+    spanProcessors: [new SimpleSpanProcessor(traceExporter)],
   });
 
   provider.register({
@@ -169,9 +167,34 @@ export function initTelemetry() {
       }),
       new UserInteractionInstrumentation({
         eventNames: ["click"],
+        // By default only emits spans when a click triggers fetch/XHR.
+        // Override to always emit click spans.
+        shouldPreventSpanCreation: () => false,
       }),
     ],
   });
+
+  // Flush spans before the page is closed
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      provider.forceFlush().catch(() => {});
+    }
+  });
+
+  // Explicit page-view span — guarantees at least one trace per visit
+  const tracer = trace.getTracer("personal-website");
+  const pageViewSpan = tracer.startSpan("page_view", {
+    attributes: {
+      "page.url": window.location.href,
+      "page.path": window.location.pathname,
+      "page.referrer": document.referrer || "direct",
+      "browser.user_agent": navigator.userAgent,
+      "browser.language": navigator.language,
+      "screen.width": window.screen.width,
+      "screen.height": window.screen.height,
+    },
+  });
+  pageViewSpan.end();
 
   // Web Vitals — reported as custom spans
   reportWebVitals();
@@ -207,8 +230,10 @@ async function reportWebVitals() {
 
 ### Key concepts
 
-- **SimpleSpanProcessor** (dev): sends each span immediately — easier to debug.
-- **BatchSpanProcessor** (prod): batches spans and sends them periodically — better performance.
+- **SimpleSpanProcessor** is used in all environments so spans are sent immediately. `BatchSpanProcessor` buffers spans and loses them when the user closes the tab before the next flush — a very common cause of missing data in browser telemetry.
+- **Page-unload flush**: a `visibilitychange` listener calls `provider.forceFlush()` when the page goes hidden, catching any late spans (e.g. CLS, INP).
+- **Explicit `page_view` span**: guarantees at least one trace per visit, independent of auto-instrumentations.
+- **`shouldPreventSpanCreation: () => false`**: forces the `UserInteractionInstrumentation` to emit click spans even when the click doesn't trigger a network request.
 - **Web Vitals as spans**: each Core Web Vital measurement becomes a span with attributes like `web_vital.rating` ("good" / "needs-improvement" / "poor").
 
 ---
@@ -346,6 +371,15 @@ VITE_APP_VERSION=0.0.0
 
 - Visualization: **Table**
 
+**Page views**
+
+```
+{resource.service.name="personal-website" && name="page_view"}
+```
+
+- Visualization: **Table**
+- Shows every visit with path, referrer, browser language, and screen size.
+
 **Poor web vitals**
 
 ```
@@ -408,3 +442,48 @@ Since this is a frontend-only app, the `VITE_OTEL_EXPORTER_OTLP_AUTH` token is e
 - You **never** use an admin-scoped token
 
 If you want to hide the credentials entirely, you can later add a small proxy (e.g. a Netlify Edge Function or serverless function) that forwards spans to Grafana Cloud with the auth header attached server-side.
+
+---
+
+## Troubleshooting
+
+### Only some panels show data
+
+**TraceQL metrics must be enabled separately.**  
+The time-series queries (`rate()`, `count_over_time()`, `quantile_over_time()`) use _TraceQL metrics_, which is a separate Grafana Cloud feature. If it's not enabled for your stack:
+
+1. Go to **Grafana Cloud → your stack → Tempo → Features**
+2. Enable **TraceQL metrics** (may require a paid plan)
+3. Without it, the basic trace-search panels (tables, stats) will still work, but the aggregate time-series panels will show no data.
+
+### "Streaming Progress" instead of trace data
+
+When a panel shows a single "Streaming Progress" row, click the **data-frame dropdown below the panel** and switch to **Traces**.
+
+### Verify spans are arriving
+
+The simplest query to check all traces from the site:
+
+```
+{resource.service.name="personal-website"}
+```
+
+If this returns nothing, double-check:
+
+1. **Environment variables are set** — visit the deployed site and check the browser console for `[telemetry] OpenTelemetry initialised → Grafana Cloud`. If you see the "telemetry disabled" warning, the env vars aren't reaching the build.
+2. **Network tab** — look for POST requests to your OTLP endpoint (`/v1/traces`). Check the response status:
+   - `200` / `204` = spans accepted
+   - `401` / `403` = auth token is wrong or expired
+   - `CORS error` = the OTLP gateway is rejecting the browser origin
+3. **Redeploy after changing env vars** — Netlify does not auto-rebuild when you add/change env variables. You must trigger a new deploy.
+
+### Click spans not appearing
+
+The `UserInteractionInstrumentation` by default only emits spans when a click triggers a fetch/XHR call. The `shouldPreventSpanCreation: () => false` override fixes this so all clicks produce spans.
+
+### CLS and INP appear late (or not at all)
+
+- **CLS** is only reported when the page becomes hidden (tab switch or close).
+- **INP** is only reported on page unload.
+
+The `visibilitychange` flush handler ensures these late spans are exported before the page closes.

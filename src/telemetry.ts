@@ -55,13 +55,12 @@ export function initTelemetry() {
   });
 
   // ── Provider ──────────────────────────────────────────────────────────
+  // Use SimpleSpanProcessor in ALL environments so spans are sent
+  // immediately. BatchSpanProcessor buffers spans and loses them when the
+  // user closes the tab before the next flush.
   const provider = new WebTracerProvider({
     resource,
-    spanProcessors: [
-      import.meta.env.DEV
-        ? new SimpleSpanProcessor(traceExporter) // flush immediately during dev
-        : new BatchSpanProcessor(traceExporter),
-    ],
+    spanProcessors: [new SimpleSpanProcessor(traceExporter)],
   });
 
   provider.register({
@@ -84,9 +83,39 @@ export function initTelemetry() {
       }),
       new UserInteractionInstrumentation({
         eventNames: ["click"],
+        // By default UserInteractionInstrumentation only emits spans
+        // when a click triggers a fetch/XHR. Override to always emit.
+        shouldPreventSpanCreation: () => false,
       }),
     ],
   });
+
+  // ── Flush spans before the page is closed ─────────────────────────────
+  // This catches any spans that haven't been sent yet (e.g. late web vitals).
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      provider.forceFlush().catch(() => {
+        // best-effort – page is closing, nothing more we can do
+      });
+    }
+  });
+
+  // ── Page view span ────────────────────────────────────────────────────
+  // Explicit page-view span so there is always at least one trace per visit,
+  // independent of auto-instrumentations.
+  const tracer = trace.getTracer("personal-website");
+  const pageViewSpan = tracer.startSpan("page_view", {
+    attributes: {
+      "page.url": window.location.href,
+      "page.path": window.location.pathname,
+      "page.referrer": document.referrer || "direct",
+      "browser.user_agent": navigator.userAgent,
+      "browser.language": navigator.language,
+      "screen.width": window.screen.width,
+      "screen.height": window.screen.height,
+    },
+  });
+  pageViewSpan.end();
 
   // ── Web Vitals ────────────────────────────────────────────────────────
   reportWebVitals();
