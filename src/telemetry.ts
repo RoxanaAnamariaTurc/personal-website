@@ -73,12 +73,14 @@ export function initTelemetry() {
     instrumentations: [
       new DocumentLoadInstrumentation(),
       new FetchInstrumentation({
-        // Only trace fetch calls to your own origin or known APIs
-        propagateTraceHeaderCorsUrls: [/localhost/, /github\.com/],
+        // Only propagate trace headers to origins that accept them.
+        // Do NOT include third-party APIs (e.g. github.com) – they
+        // reject the extra `traceparent` header during CORS preflight.
+        propagateTraceHeaderCorsUrls: [/localhost/],
         clearTimingResources: true,
       }),
       new XMLHttpRequestInstrumentation({
-        propagateTraceHeaderCorsUrls: [/localhost/, /github\.com/],
+        propagateTraceHeaderCorsUrls: [/localhost/],
       }),
       new UserInteractionInstrumentation({
         eventNames: ["click"],
