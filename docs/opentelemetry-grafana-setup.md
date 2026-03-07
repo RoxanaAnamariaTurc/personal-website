@@ -366,10 +366,11 @@ VITE_APP_VERSION=0.0.0
 **User clicks**
 
 ```
-{resource.service.name="personal-website" && name=~"click.*"}
+{resource.service.name="personal-website" && name="user_click"}
 ```
 
 - Visualization: **Table**
+- Attributes include `click.tag`, `click.text`, `click.aria_label`, `click.href`, and `click.page_path`.
 
 **Page views**
 
@@ -479,7 +480,7 @@ If this returns nothing, double-check:
 
 ### Click spans not appearing
 
-The `UserInteractionInstrumentation` by default only emits spans when a click triggers a fetch/XHR call. The `shouldPreventSpanCreation: () => false` override fixes this so all clicks produce spans.
+The `UserInteractionInstrumentation` only emits spans when a click triggers an async task tracked by Zone.js (fetch, XHR, timer). The manual `trackClicks()` listener in `telemetry.ts` works around this by creating a `user_click` span for every click, regardless of what the handler does.
 
 ### CLS and INP appear late (or not at all)
 

@@ -117,10 +117,54 @@ export function initTelemetry() {
   });
   pageViewSpan.end();
 
+  // ── Click tracking ─────────────────────────────────────────────────────
+  // UserInteractionInstrumentation only emits spans when a click triggers
+  // async work (fetch/XHR/timer). Add a manual listener so every click
+  // produces a span, regardless of what the handler does.
+  trackClicks(tracer);
+
   // ── Web Vitals ────────────────────────────────────────────────────────
   reportWebVitals();
 
   console.info("[telemetry] OpenTelemetry initialised → Grafana Cloud");
+}
+
+// ---------------------------------------------------------------------------
+// Manual click tracking → custom OTel spans
+// ---------------------------------------------------------------------------
+function trackClicks(tracer: ReturnType<typeof trace.getTracer>) {
+  document.addEventListener(
+    "click",
+    (event) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      // Walk up to find the nearest interactive element (button, link, etc.)
+      const interactiveEl =
+        target.closest("a, button, [role='button'], input, select, textarea") ??
+        target;
+
+      const tagName = interactiveEl.tagName.toLowerCase();
+      const text = (interactiveEl.textContent ?? "").trim().slice(0, 100);
+      const ariaLabel = interactiveEl.getAttribute("aria-label") ?? "";
+      const href =
+        interactiveEl instanceof HTMLAnchorElement
+          ? interactiveEl.href
+          : undefined;
+
+      const span = tracer.startSpan("user_click", {
+        attributes: {
+          "click.tag": tagName,
+          "click.text": text,
+          "click.aria_label": ariaLabel,
+          "click.page_path": window.location.pathname,
+          ...(href ? { "click.href": href } : {}),
+        },
+      });
+      span.end();
+    },
+    { capture: true },
+  );
 }
 
 // ---------------------------------------------------------------------------
