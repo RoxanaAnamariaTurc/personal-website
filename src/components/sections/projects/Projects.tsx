@@ -56,6 +56,8 @@ export const Projects = () => {
 
       const data = await response.json();
 
+      span.setAttribute("github.repo_count_raw", data.length);
+
       const mapped = data
         .filter(
           (repo: any) =>
@@ -85,7 +87,6 @@ export const Projects = () => {
       span.setAttribute("projects.count", mapped.length);
 
       setProjects(mapped);
-      setLoading(false);
       span.setStatus({ code: SpanStatusCode.OK });
     } catch (error) {
       span.recordException(error as Error);
@@ -93,8 +94,8 @@ export const Projects = () => {
         code: SpanStatusCode.ERROR,
         message: error instanceof Error ? error.message : "Unknown error",
       });
-      setLoading(false);
     } finally {
+      setLoading(false);
       span.end();
     }
   };

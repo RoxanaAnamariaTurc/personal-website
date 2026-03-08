@@ -1,8 +1,7 @@
-import { trace, SpanStatusCode } from "@opentelemetry/api";
+import { SpanStatusCode } from "@opentelemetry/api";
 import {
   WebTracerProvider,
   SimpleSpanProcessor,
-  ConsoleSpanExporter,
 } from "@opentelemetry/sdk-trace-web";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
@@ -40,10 +39,7 @@ export function initTelemetry() {
 
   const provider = new WebTracerProvider({
     resource,
-    spanProcessors: [
-      new SimpleSpanProcessor(new ConsoleSpanExporter()),
-      new SimpleSpanProcessor(exporter),
-    ],
+    spanProcessors: [new SimpleSpanProcessor(exporter)],
   });
 
   registerInstrumentations({
@@ -89,19 +85,8 @@ export function initTelemetry() {
       });
     }
   });
-
-  // const tracer = getAppTracer();
   const tracer = provider.getTracer(SERVICE_NAME);
   appTracer = tracer;
-
-  provider
-    .forceFlush()
-    .then(() => {
-      console.log("[telemetry] flush after test span complete");
-    })
-    .catch((err) => {
-      console.error("[telemetry] flush after test span failed", err);
-    });
 
   const startupSpan = tracer.startSpan("app.startup", {
     attributes: {
@@ -123,14 +108,6 @@ export function initTelemetry() {
     },
   });
   pageViewSpan.end();
-  provider
-    .forceFlush()
-    .then(() => {
-      console.log("[telemetry] forceFlush complete");
-    })
-    .catch((err) => {
-      console.error("[telemetry] forceFlush failed", err);
-    });
 
   trackClicks(tracer);
   reportWebVitals();
@@ -138,7 +115,7 @@ export function initTelemetry() {
   console.info("[telemetry] OpenTelemetry initialised");
 }
 
-function trackClicks(tracer: ReturnType<typeof trace.getTracer>) {
+function trackClicks(tracer: NonNullable<typeof appTracer>) {
   document.addEventListener(
     "click",
     (event) => {
