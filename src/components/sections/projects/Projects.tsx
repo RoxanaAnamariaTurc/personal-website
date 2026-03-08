@@ -11,6 +11,8 @@ import {
   sectionTitle,
   searchInput,
 } from "./Projects.css";
+import { getAppTracer } from "../../../telemetry";
+import { SpanStatusCode } from "@opentelemetry/api";
 
 export const Projects = () => {
   const [projects, setProjects] = React.useState<ProjectProps[]>([]);
@@ -27,41 +29,75 @@ export const Projects = () => {
     [projects, inputValue],
   );
 
-  const fetchProjects = async () => {
-    const response = await fetch(
-      "https://api.github.com/users/roxanaanamariaturc/repos",
-    );
-    const data = await response.json();
-    const mapped: ProjectProps[] = data
-      .filter(
-        (repo: any) =>
-          repo.name !== "grafana" && repo.name !== "personal-website",
-      )
-      .map((repo: any) => {
-        const overrides = projectOverrides[repo.name] ?? {};
-        return {
-          id: repo.id,
-          name: repo.name
-            .replace(/[-_]/g, " ")
-            .replace(/([a-z])([A-Z])/g, "$1 $2")
-            .replace(/\b\w/g, (c: string) => c.toUpperCase()),
-          description: repo.description,
-          // language: repo.language,
-          topics: repo.topics ?? [],
-          html_url: repo.html_url,
-          updated_at: repo.updated_at,
-          ...overrides,
-        };
-      })
-      .sort(
-        (a: ProjectProps, b: ProjectProps) =>
-          new Date(b.updated_at ?? 0).getTime() -
-          new Date(a.updated_at ?? 0).getTime(),
-      );
-    setProjects(mapped);
-    setLoading(false);
-  };
+  const tracer = getAppTracer();
 
+  const fetchProjects = async () => {
+    const span = tracer.startSpan("load_projects", {
+      attributes: {
+        "projects.source": "github",
+        "projects.user": "roxanaanamariaturc",
+      },
+    });
+
+    try {
+      const response = await fetch(
+        "https://api.github.com/users/roxanaanamariaturc/repos",
+      );
+
+      span.setAttribute("github.http_status", response.status);
+
+      if (!response.ok) {
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: `GitHub request failed with status ${response.status}`,
+        });
+        throw new Error(`GitHub request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      const mapped = data
+        .filter(
+          (repo: any) =>
+            repo.name !== "grafana" && repo.name !== "personal-website",
+        )
+        .map((repo: any) => {
+          const overrides = projectOverrides[repo.name] ?? {};
+          return {
+            id: repo.id,
+            name: repo.name
+              .replace(/[-_]/g, " ")
+              .replace(/([a-z])([A-Z])/g, "$1 $2")
+              .replace(/\b\w/g, (c: string) => c.toUpperCase()),
+            description: repo.description,
+            topics: repo.topics ?? [],
+            html_url: repo.html_url,
+            updated_at: repo.updated_at,
+            ...overrides,
+          };
+        })
+        .sort(
+          (a: ProjectProps, b: ProjectProps) =>
+            new Date(b.updated_at ?? 0).getTime() -
+            new Date(a.updated_at ?? 0).getTime(),
+        );
+
+      span.setAttribute("projects.count", mapped.length);
+
+      setProjects(mapped);
+      setLoading(false);
+      span.setStatus({ code: SpanStatusCode.OK });
+    } catch (error) {
+      span.recordException(error as Error);
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      setLoading(false);
+    } finally {
+      span.end();
+    }
+  };
   React.useEffect(() => {
     fetchProjects();
   }, []);
