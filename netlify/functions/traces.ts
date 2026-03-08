@@ -10,23 +10,44 @@ export const handler = async (event: any) => {
   }
 
   try {
+    const incomingContentType =
+      event.headers?.["content-type"] ||
+      event.headers?.["Content-Type"] ||
+      "application/x-protobuf";
+
+    const body = event.isBase64Encoded
+      ? Buffer.from(event.body || "", "base64")
+      : event.body || "";
+
     const response = await fetch(`${endpoint}/v1/traces`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": incomingContentType,
         Authorization: `Basic ${auth}`,
       },
-      body: event.body,
+      body,
     });
+
+    const text = await response.text();
 
     return {
       statusCode: response.status,
-      body: await response.text(),
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        status: response.ok ? "ok" : "error",
+        upstreamStatus: response.status,
+        upstreamBody: text,
+      }),
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: "Trace forwarding failed",
+      body: JSON.stringify({
+        status: "error",
+        message: err instanceof Error ? err.message : "Trace forwarding failed",
+      }),
     };
   }
 };
