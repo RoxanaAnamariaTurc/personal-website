@@ -23,37 +23,19 @@ export function getAppTracer() {
 }
 
 export function initTelemetry() {
-  const otlpEndpoint = import.meta.env.VITE_OTEL_EXPORTER_OTLP_ENDPOINT;
-  const otlpAuth = import.meta.env.VITE_OTEL_EXPORTER_OTLP_AUTH;
-
-  if (!otlpEndpoint) {
-    console.warn("[telemetry] OTLP endpoint missing. Telemetry disabled.");
-    return;
-  }
-
   const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: SERVICE_NAME,
     [ATTR_SERVICE_VERSION]: import.meta.env.VITE_APP_VERSION ?? "0.0.0",
     "deployment.environment": import.meta.env.MODE,
   });
 
-  const headers: Record<string, string> = {};
-  if (otlpAuth) {
-    headers["Authorization"] = `Basic ${otlpAuth}`;
-  }
-
   const exporter = new OTLPTraceExporter({
-    url: `${otlpEndpoint}/v1/traces`,
-    headers,
+    url: "/.netlify/functions/traces",
   });
 
   const provider = new WebTracerProvider({
     resource,
     spanProcessors: [new SimpleSpanProcessor(exporter)],
-  });
-
-  provider.register({
-    contextManager: new ZoneContextManager(),
   });
 
   registerInstrumentations({
