@@ -9,7 +9,6 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from "@opentelemetry/semantic-conventions";
-import { ZoneContextManager } from "@opentelemetry/context-zone";
 import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { DocumentLoadInstrumentation } from "@opentelemetry/instrumentation-document-load";
 import { FetchInstrumentation } from "@opentelemetry/instrumentation-fetch";
