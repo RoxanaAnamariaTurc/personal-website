@@ -18,8 +18,13 @@ import type { Metric } from "web-vitals";
 
 const SERVICE_NAME = "personal-website";
 
+let appTracer: ReturnType<WebTracerProvider["getTracer"]> | null = null;
+
 export function getAppTracer() {
-  return trace.getTracer(SERVICE_NAME);
+  if (!appTracer) {
+    throw new Error("Telemetry tracer not initialised yet");
+  }
+  return appTracer;
 }
 
 export function initTelemetry() {
@@ -87,10 +92,7 @@ export function initTelemetry() {
 
   // const tracer = getAppTracer();
   const tracer = provider.getTracer(SERVICE_NAME);
-
-  const testSpan = tracer.startSpan("otel_test_span");
-  console.log("[telemetry] test span recording:", testSpan.isRecording());
-  testSpan.end();
+  appTracer = tracer;
 
   provider
     .forceFlush()
@@ -178,7 +180,7 @@ function trackClicks(tracer: ReturnType<typeof trace.getTracer>) {
 
 async function reportWebVitals() {
   const { onCLS, onFCP, onLCP, onTTFB, onINP } = await import("web-vitals");
-  const tracer = trace.getTracer("web-vitals");
+  const tracer = getAppTracer();
 
   function sendVitalAsSpan(metric: Metric) {
     const span = tracer.startSpan(`web-vital.${metric.name}`, {
