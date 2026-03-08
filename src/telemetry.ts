@@ -103,6 +103,14 @@ export function initTelemetry() {
     },
   });
   pageViewSpan.end();
+  provider
+    .forceFlush()
+    .then(() => {
+      console.log("[telemetry] forceFlush complete");
+    })
+    .catch((err) => {
+      console.error("[telemetry] forceFlush failed", err);
+    });
 
   trackClicks(tracer);
   reportWebVitals();
