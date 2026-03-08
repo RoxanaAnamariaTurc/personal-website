@@ -87,6 +87,19 @@ export function initTelemetry() {
 
   const tracer = getAppTracer();
 
+  const testSpan = tracer.startSpan("otel_test_span");
+  console.log("[telemetry] test span recording:", testSpan.isRecording());
+  testSpan.end();
+
+  provider
+    .forceFlush()
+    .then(() => {
+      console.log("[telemetry] flush after test span complete");
+    })
+    .catch((err) => {
+      console.error("[telemetry] flush after test span failed", err);
+    });
+
   const startupSpan = tracer.startSpan("app.startup", {
     attributes: {
       "page.url": window.location.href,
