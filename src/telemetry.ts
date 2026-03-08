@@ -85,7 +85,8 @@ export function initTelemetry() {
     }
   });
 
-  const tracer = getAppTracer();
+  // const tracer = getAppTracer();
+  const tracer = provider.getTracer(SERVICE_NAME);
 
   const testSpan = tracer.startSpan("otel_test_span");
   console.log("[telemetry] test span recording:", testSpan.isRecording());
