@@ -13,6 +13,7 @@ export const Talks = () => {
             eventName={talk.eventName}
             location={talk.location}
             date={talk.date}
+            videoUrl={talk.videoUrl}
           />
         ))}
       </div>

@@ -11,6 +11,7 @@ export type TalkProps = {
   eventName: string;
   talkTopic: string;
   location: string;
+  videoUrl: string;
 };
 
 export const Talk = (talk: TalkProps) => {
@@ -18,7 +19,7 @@ export const Talk = (talk: TalkProps) => {
     <article className={talkArticle}>
       <iframe
         className={talkVideo}
-        src="https://player.vimeo.com/video/1150049221?title=0&byline=0&portrait=0"
+        src={talk.videoUrl}
         loading="lazy"
         frameBorder="0"
         allow="fullscreen; picture-in-picture"
