@@ -4,18 +4,17 @@ import {
   spacing,
   radii,
   shadows,
-  cardSizes,
   typography,
   transitions,
 } from "../../../../ui/tokens/theme";
 
 export const projectCard = style({
-  display: "flex",
-  flexDirection: "column",
-  width: cardSizes.md.width,
+  display: "grid",
+  gridTemplateColumns: "minmax(170px, 0.85fr) minmax(0, 1.15fr)",
+  width: "100%",
   height: "100%",
   backgroundColor: colors.background.surface,
-  borderRadius: radii.lg,
+  borderRadius: radii.md,
   border: `1px solid ${colors.border.subtle}`,
   overflow: "hidden",
   boxShadow: shadows.md,
@@ -26,24 +25,57 @@ export const projectCard = style({
     borderColor: colors.accent.highlight,
   },
   "@media": {
-    "(max-width: 768px)": {
-      width: "100%",
+    "(max-width: 640px)": {
+      gridTemplateColumns: "1fr",
     },
   },
 });
 
+export const projectVisual = style({
+  position: "relative",
+  minHeight: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background:
+    "linear-gradient(135deg, rgba(84,242,199,0.18), rgba(143,92,255,0.16))",
+});
+
 export const imgCard = style({
   width: "100%",
-  height: cardSizes.md.imageHeight,
+  minHeight: "100%",
+  aspectRatio: "4 / 3",
   overflow: "hidden",
   backgroundColor: colors.background.surfaceAlt,
+  "@media": {
+    "(max-width: 640px)": {
+      minHeight: "220px",
+      aspectRatio: "16 / 9",
+    },
+  },
+});
+
+export const fallbackVisual = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+  height: "100%",
+  minHeight: "260px",
+  padding: spacing[4],
+  textAlign: "center",
+  color: colors.text.primary,
+  fontSize: typography.fontSize.xl,
+  fontWeight: typography.fontWeight.bold,
 });
 
 export const projectImage = style({
   width: "100%",
   height: "100%",
-  objectFit: "cover",
+  objectFit: "contain",
+  padding: spacing[3],
   transition: `transform ${transitions.slow}`,
+  backgroundColor: colors.background.body,
   selectors: {
     [`${projectCard}:hover &`]: {
       transform: "scale(1.05)",
@@ -55,8 +87,17 @@ export const detailsCard = style({
   display: "flex",
   flexDirection: "column",
   gap: spacing[3],
-  padding: spacing[5],
+  padding: spacing[4],
   flex: 1,
+  minWidth: 0,
+});
+
+export const projectEyebrow = style({
+  margin: 0,
+  color: colors.accent.highlight,
+  fontSize: typography.fontSize.xs,
+  fontWeight: typography.fontWeight.bold,
+  textTransform: "uppercase",
 });
 
 export const projectTitle = style({
@@ -67,13 +108,22 @@ export const projectTitle = style({
   lineHeight: typography.lineHeight.heading,
 });
 
+export const projectImpact = style({
+  fontSize: typography.fontSize.sm,
+  color: colors.text.primary,
+  lineHeight: typography.lineHeight.body,
+  margin: 0,
+  paddingLeft: spacing[3],
+  borderLeft: `3px solid ${colors.accent.highlight}`,
+});
+
 export const projectDescription = style({
   fontSize: typography.fontSize.sm,
   color: colors.text.muted,
   lineHeight: typography.lineHeight.body,
   margin: 0,
   display: "-webkit-box",
-  WebkitLineClamp: 3,
+  WebkitLineClamp: 4,
   WebkitBoxOrient: "vertical",
   overflow: "hidden",
 });
@@ -98,6 +148,7 @@ export const techTag = style({
 
 export const cardActions = style({
   display: "flex",
+  flexWrap: "wrap",
   gap: spacing[3],
   marginTop: "auto",
   paddingTop: spacing[3],

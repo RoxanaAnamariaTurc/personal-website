@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "k6:http": "k6 run k6/http-smoke.js",
+    "k6:browser": "k6 run k6/browser-otel.js",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

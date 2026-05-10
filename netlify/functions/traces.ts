@@ -1,4 +1,10 @@
-export const handler = async (event: any) => {
+type TraceProxyEvent = {
+  body?: string | null;
+  headers?: Record<string, string | undefined>;
+  isBase64Encoded?: boolean;
+};
+
+export const handler = async (event: TraceProxyEvent) => {
   const endpoint = process.env.GRAFANA_OTLP_ENDPOINT;
   const auth = process.env.GRAFANA_OTLP_AUTH;
 

@@ -1,14 +1,75 @@
 export type ProjectProps = {
   id: number;
   name: string;
+  eyebrow?: string;
   description: string | null;
+  impact?: string;
   language?: string | null;
   topics: string[];
   html_url: string;
   updated_at?: string;
   liveLink?: string;
   imgLink?: string;
+  hideSourceLink?: boolean;
 };
+
+const careerDashboardUrl =
+  import.meta.env.VITE_GRAFANA_CAREER_DASHBOARD_URL ||
+  "https://roxanaturc25.grafana.net/public-dashboards/7af1368d61d34f5abdde3a34ca039ef5";
+
+export const featuredProjects: ProjectProps[] = [
+  {
+    id: 101,
+    eyebrow: "Grafana project",
+    name: "Career Dashboard",
+    description:
+      "A personal Grafana dashboard for visualising career growth signals across projects, talks, goals, and community activity.",
+    impact:
+      "Turns personal development into something visible, trackable, and easier to reflect on.",
+    topics: ["Grafana", "Infinity plugin", "Dashboards", "Career data"],
+    html_url: careerDashboardUrl || "https://grafana.com/",
+    liveLink: careerDashboardUrl || undefined,
+    hideSourceLink: true,
+  },
+  {
+    id: 102,
+    eyebrow: "Observability project",
+    name: "Personal Website Observability",
+    description:
+      "This portfolio is instrumented with OpenTelemetry, Web Vitals spans, a Netlify trace proxy, Grafana Cloud, and k6 browser checks.",
+    impact:
+      "Uses the website itself as a small production-style frontend observability lab.",
+    topics: ["OpenTelemetry", "Grafana Cloud", "Web Vitals", "k6", "Netlify"],
+    html_url: "https://github.com/RoxanaAnamariaTurc/personal-website",
+    imgLink: "/assets/images/portfolio.png",
+  },
+  {
+    id: 103,
+    eyebrow: "Mobile and PWA",
+    name: "RUNNER",
+    description:
+      "A cross-platform running events app for organisers and communities, with event management, gallery, sponsor, multilingual, and offline-friendly flows.",
+    impact:
+      "Shows product architecture across mobile, web, content, and community workflows.",
+    topics: ["React Native", "Expo", "TypeScript", "Expo Router", "i18next"],
+    html_url: "https://github.com/RoxanaAnamariaTurc/runner-app",
+    liveLink: "https://runner-app-rox.netlify.app/",
+    imgLink: "/assets/images/runner.png",
+  },
+  {
+    id: 104,
+    eyebrow: "Product UI",
+    name: "Little Lemon Restaurant",
+    description:
+      "A responsive restaurant web app with table reservations, form validation, authentication, ordering, and cart functionality.",
+    impact:
+      "Demonstrates polished user flows, form-heavy UI, responsive design, and tested React patterns.",
+    topics: ["React", "Formik", "Yup", "Testing Library", "Responsive UI"],
+    html_url: "https://github.com/RoxanaAnamariaTurc/little-lemon",
+    liveLink: "https://littlelemonresta.netlify.app/",
+    imgLink: "/assets/images/lemon.png",
+  },
+];
 
 // Hardcoded overrides for live links and images (not available from GitHub API)
 export const projectOverrides: Record<

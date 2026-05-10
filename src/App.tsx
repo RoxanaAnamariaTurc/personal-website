@@ -3,17 +3,17 @@ import { PageShell } from "./components/layout/page-shell/PageShell";
 import { Footer } from "./components/layout/footer/Footer";
 import { Projects } from "./components/sections/projects/Projects";
 import { Talks } from "./components/sections/talks/Talks";
-import { About } from "./components/sections/about/About";
-import { Contact } from "./components/sections/contact/Contact";
+import { Experience } from "./components/sections/experience/Experience";
+import { Observability } from "./components/sections/observability/Observability";
 
 function App() {
   return (
     <PageShell>
       <Hero />
+      <Experience />
       <Projects />
+      <Observability />
       <Talks />
-      <About />
-      <Contact />
       <Footer />
     </PageShell>
   );

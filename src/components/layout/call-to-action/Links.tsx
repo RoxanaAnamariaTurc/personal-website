@@ -43,6 +43,13 @@ export const Links = () => {
       <nav className={nav}>
         <a
           className={link}
+          href="#experience"
+          onClick={(e) => handleNavClick(e, "experience")}
+        >
+          Experience
+        </a>
+        <a
+          className={link}
           href="#projects"
           onClick={(e) => handleNavClick(e, "projects")}
         >
@@ -57,17 +64,10 @@ export const Links = () => {
         </a>
         <a
           className={link}
-          href="#about"
-          onClick={(e) => handleNavClick(e, "about")}
+          href="#observability"
+          onClick={(e) => handleNavClick(e, "observability")}
         >
-          About
-        </a>
-        <a
-          className={link}
-          href="#contact"
-          onClick={(e) => handleNavClick(e, "contact")}
-        >
-          Contact
+          Observability
         </a>
       </nav>
     </div>

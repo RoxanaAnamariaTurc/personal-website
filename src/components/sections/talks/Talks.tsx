@@ -9,6 +9,7 @@ export const Talks = () => {
       <div className={talksDiv}>
         {talksData.map((talk) => (
           <Talk
+            key={`${talk.eventName}-${talk.date}`}
             talkTopic={talk.talkTopic}
             eventName={talk.eventName}
             location={talk.location}
