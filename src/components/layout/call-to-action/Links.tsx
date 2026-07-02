@@ -37,38 +37,28 @@ const handleNavClick = (
   smoothScrollTo(targetId);
 };
 
+const navItems = [
+  { label: "Experience", target: "experience" },
+  { label: "Projects", target: "projects" },
+  { label: "Observability", target: "observability" },
+  { label: "Writing", target: "writing" },
+  { label: "Talks", target: "talks" },
+];
+
 export const Links = () => {
   return (
     <div className={links}>
       <nav className={nav}>
-        <a
-          className={link}
-          href="#experience"
-          onClick={(e) => handleNavClick(e, "experience")}
-        >
-          Experience
-        </a>
-        <a
-          className={link}
-          href="#projects"
-          onClick={(e) => handleNavClick(e, "projects")}
-        >
-          Projects
-        </a>
-        <a
-          className={link}
-          href="#talks"
-          onClick={(e) => handleNavClick(e, "talks")}
-        >
-          Talks
-        </a>
-        <a
-          className={link}
-          href="#observability"
-          onClick={(e) => handleNavClick(e, "observability")}
-        >
-          Observability
-        </a>
+        {navItems.map((item) => (
+          <a
+            className={link}
+            href={`#${item.target}`}
+            key={item.target}
+            onClick={(e) => handleNavClick(e, item.target)}
+          >
+            {item.label}
+          </a>
+        ))}
       </nav>
     </div>
   );

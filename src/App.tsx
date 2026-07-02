@@ -5,6 +5,7 @@ import { Projects } from "./components/sections/projects/Projects";
 import { Talks } from "./components/sections/talks/Talks";
 import { Experience } from "./components/sections/experience/Experience";
 import { Observability } from "./components/sections/observability/Observability";
+import { Writing } from "./components/sections/writing/Writing";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Experience />
       <Projects />
       <Observability />
+      <Writing />
       <Talks />
       <Footer />
     </PageShell>
