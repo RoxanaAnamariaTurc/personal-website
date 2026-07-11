@@ -18,6 +18,7 @@ import type { Metric } from "web-vitals";
 const SERVICE_NAME = "personal-website";
 
 let appTracer: ReturnType<WebTracerProvider["getTracer"]> | null = null;
+let telemetryInitialised = false;
 
 export function getAppTracer() {
   if (!appTracer) {
@@ -27,6 +28,9 @@ export function getAppTracer() {
 }
 
 export function initTelemetry() {
+  if (telemetryInitialised) return;
+  telemetryInitialised = true;
+
   const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: SERVICE_NAME,
     [ATTR_SERVICE_VERSION]: import.meta.env.VITE_APP_VERSION ?? "0.0.0",
@@ -121,6 +125,8 @@ function trackClicks(tracer: NonNullable<typeof appTracer>) {
     (event) => {
       const target = event.target as HTMLElement | null;
       if (!target) return;
+
+      if (target.closest("[data-telemetry-ignore='true']")) return;
 
       const interactiveEl =
         target.closest("a, button, [role='button'], input, select, textarea") ??

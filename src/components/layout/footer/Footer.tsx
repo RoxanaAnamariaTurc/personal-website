@@ -8,7 +8,11 @@ import {
   footerTitle,
 } from "./Footer.css";
 
-export const Footer = () => {
+type FooterProps = {
+  onOpenPrivacySettings: () => void;
+};
+
+export const Footer = ({ onOpenPrivacySettings }: FooterProps) => {
   return (
     <footer className={footer}>
       <div>
@@ -28,6 +32,14 @@ export const Footer = () => {
         <a className={footerLink} href={profile.github}>
           GitHub
         </a>
+        <button
+          className={footerLink}
+          type="button"
+          data-telemetry-ignore="true"
+          onClick={onOpenPrivacySettings}
+        >
+          Privacy settings
+        </button>
       </div>
       <p className={footerMeta}>
         Made by Roxana using React in {new Date().getFullYear()}
