@@ -42,37 +42,34 @@ VUS=1 DURATION=5s npm run k6:http
 Run the browser telemetry test:
 
 ```bash
-npm run k6:browser
+BASE_URL=http://localhost:5173 npm run k6:browser
 ```
 
-The default target is:
-
-```bash
-http://localhost:5173
-```
+Local Vite does not serve the Netlify Function, so this command is useful for
+UI checks but the telemetry-proxy assertion will fail unless the app is run
+through Netlify Dev.
 
 ## Run Against The Deployed Site
 
-Pass `BASE_URL` when running either script:
+The browser telemetry test defaults to the deployed Netlify site:
 
 ```bash
-BASE_URL=https://your-site.netlify.app npm run k6:http
-BASE_URL=https://your-site.netlify.app npm run k6:browser
+npm run k6:browser
 ```
 
-For the browser script, you can tune the amount of synthetic traffic:
+This produces three synthetic visits with one browser VU. Override the target
+or traffic size when needed:
 
 ```bash
-BASE_URL=https://your-site.netlify.app VUS=5 DURATION=2m npm run k6:browser
+BASE_URL=https://another-site.example VUS=2 ITERATIONS=6 npm run k6:browser
 ```
 
-Start gently. Browser tests are heavier than HTTP tests, and each visit can create multiple spans:
+Start gently. Browser tests are heavier than HTTP tests, and each opted-in visit
+can create multiple spans:
 
 - document-load spans
-- fetch spans
 - `app.startup`
 - `page_view`
-- `load_projects`
 - `user_click`
 - `web-vital.*`
 
@@ -92,11 +89,11 @@ flowchart LR
 The browser script:
 
 1. Opens the site.
-2. Waits for network activity to settle.
-3. Clicks the `Projects` nav link.
-4. Fills the project search input.
+2. Accepts optional telemetry when the consent dialog is present.
+3. Verifies that `POST /.netlify/functions/traces` receives a `200` or `204` response.
+4. Clicks the `Projects` navigation link.
 5. Checks that the projects section rendered.
-6. Clicks `Talks`, `About`, and `Contact`.
+6. Clicks the `Observability` and `Talks` navigation links.
 7. Waits briefly so click and Web Vital spans have time to export.
 
 That should exercise the important spans from the current implementation:
@@ -106,8 +103,6 @@ That should exercise the important spans from the current implementation:
 | `app.startup` | Created during `initTelemetry()`. |
 | `page_view` | Created during `initTelemetry()`. |
 | document-load spans | Created by `DocumentLoadInstrumentation`. |
-| fetch spans | Created by `FetchInstrumentation` when projects are loaded from GitHub. |
-| `load_projects` | Created manually in `Projects.tsx`. |
 | `user_click` | Created by the document click listener. |
 | `web-vital.*` | Created from `web-vitals` callbacks. |
 
@@ -117,12 +112,6 @@ After running `npm run k6:browser`, wait a minute or two, then check Tempo:
 
 ```traceql
 {resource.service.name="personal-website"}
-```
-
-Project loading:
-
-```traceql
-{resource.service.name="personal-website" && name="load_projects"}
 ```
 
 Synthetic click traffic:
@@ -135,12 +124,6 @@ Web Vitals:
 
 ```traceql
 {resource.service.name="personal-website" && name=~"web-vital.*"}
-```
-
-GitHub fetch instrumentation:
-
-```traceql
-{resource.service.name="personal-website" && span.app.request.kind="github_api"}
 ```
 
 ## Notes

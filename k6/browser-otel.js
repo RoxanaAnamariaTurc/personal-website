@@ -1,14 +1,16 @@
 import { browser } from "k6/browser";
 import { check, sleep } from "k6";
 
-const BASE_URL = __ENV.BASE_URL || "http://localhost:5173";
+const BASE_URL = __ENV.BASE_URL || "https://roxiswebsite.netlify.app";
+const TELEMETRY_ENDPOINT = /\/\.netlify\/functions\/traces$/;
 
 export const options = {
   scenarios: {
     browser_otel: {
-      executor: "constant-vus",
-      vus: Number(__ENV.VUS || 2),
-      duration: __ENV.DURATION || "1m",
+      executor: "shared-iterations",
+      vus: Number(__ENV.VUS || 1),
+      iterations: Number(__ENV.ITERATIONS || 3),
+      maxDuration: __ENV.MAX_DURATION || "2m",
       options: {
         browser: {
           type: "chromium",
@@ -28,10 +30,32 @@ export default async function () {
   const page = await browser.newPage();
 
   try {
-    const response = await page.goto(BASE_URL, { waitUntil: "networkidle" });
+    // Start listening before navigation. Returning VUs may already have consent
+    // in localStorage, so telemetry can be exported as soon as the page loads.
+    const telemetryResponsePromise = page.waitForResponse(TELEMETRY_ENDPOINT, {
+      timeout: 15000,
+    });
+    const response = await page.goto(BASE_URL, {
+      waitUntil: "domcontentloaded",
+    });
 
     check(response, {
       "page loaded": (res) => res && res.status() === 200,
+    });
+
+    const acceptTelemetry = page.locator("button", {
+      hasText: "Accept telemetry",
+    });
+
+    if (await acceptTelemetry.isVisible()) {
+      await acceptTelemetry.click();
+    }
+
+    const telemetryResponse = await telemetryResponsePromise;
+
+    check(telemetryResponse, {
+      "telemetry reached the Netlify trace proxy": (res) =>
+        res && [200, 204].includes(res.status()),
     });
 
     const projectsLink = page.locator('a[href="#projects"]');
@@ -47,7 +71,7 @@ export default async function () {
     await page.locator('a[href="#observability"]').click();
     await page.locator('a[href="#talks"]').click();
 
-    // Give the app time to emit click and Web Vital spans before closing.
+    // Give late click and Web Vital spans time to export before closing.
     sleep(2);
   } finally {
     await page.close();
