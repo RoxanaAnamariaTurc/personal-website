@@ -9,7 +9,7 @@ import { TracingInstrumentation } from "@grafana/faro-web-tracing";
 // The Cloud collector address is part of the browser SDK configuration.
 // It is separate from the server-side source-map upload API key.
 const cloudCollectorUrl =
-  "https://faro-collector-prod-eu-west-2.grafana.net/collect/c7e0111251efda31462f595f20264f49";
+  "https://faro-collector-prod-eu-west-2.grafana.net/collect/32b8ef352d1b89e9eef9568f265b28c3";
 
 let faroInitialised = false;
 
@@ -17,7 +17,9 @@ export function initFaro() {
   if (faroInitialised) return;
 
   const isLocalDemo = import.meta.env.VITE_FARO_OSS_DEMO === "true";
-  const url = isLocalDemo ? import.meta.env.VITE_FARO_COLLECTOR_URL : cloudCollectorUrl;
+  const url = isLocalDemo
+    ? import.meta.env.VITE_FARO_COLLECTOR_URL
+    : cloudCollectorUrl;
   if (!url) throw new Error("The local Faro collector URL is missing");
 
   initializeFaro({
@@ -53,11 +55,11 @@ export function recordTalkDemoError(): boolean {
   return true;
 }
 
-export function recordTalkNavigation(target: string, source: "hero" | "section-nav") {
-  faro.api?.pushEvent(
-    "talk_site_navigation",
-    { target, source },
-    "talk-demo",
-    { skipDedupe: true },
-  );
+export function recordTalkNavigation(
+  target: string,
+  source: "hero" | "section-nav",
+) {
+  faro.api?.pushEvent("talk_site_navigation", { target, source }, "talk-demo", {
+    skipDedupe: true,
+  });
 }
