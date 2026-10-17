@@ -1,4 +1,5 @@
 import { links, nav, link } from "./Links.css";
+import { recordFaroNavigation } from "../../../observability";
 
 const smoothScrollTo = (targetId: string, duration: number = 1200) => {
   const target = document.getElementById(targetId);
@@ -35,6 +36,7 @@ const handleNavClick = (
 ) => {
   e.preventDefault();
   smoothScrollTo(targetId);
+  void recordFaroNavigation(targetId, "section-nav");
 };
 
 const navItems = [
@@ -54,6 +56,7 @@ export const Links = () => {
             className={link}
             href={`#${item.target}`}
             key={item.target}
+            data-faro-user-action-name={`navigate-${item.target}`}
             onClick={(e) => handleNavClick(e, item.target)}
           >
             {item.label}

@@ -1,3 +1,4 @@
+import { useState, type MouseEvent } from "react";
 import {
   section,
   header,
@@ -13,14 +14,44 @@ import {
   heroActions,
   primaryLink,
   secondaryLink,
+  resetDemoButton,
   location,
   introGrid,
   introCard,
 } from "./Hero.css";
 import { Links } from "../../layout/call-to-action/Links";
 import { heroHighlights, profile } from "../../../data/profileData";
+import { recordFaroNavigation } from "../../../observability";
+import { getTelemetryConsent } from "../../../privacy/telemetryConsent";
 
 export const Hero = () => {
+  const simulateNavigationFailure = import.meta.env.DEV &&
+    import.meta.env.VITE_FARO_OSS_DEMO === "true" &&
+    new URLSearchParams(window.location.search).get("demo") === "navigation-failure";
+  const [navigationStuck, setNavigationStuck] = useState(false);
+  const [demoMessage, setDemoMessage] = useState("");
+
+  const viewExperience = async (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!simulateNavigationFailure) {
+      void recordFaroNavigation("experience", "hero");
+      return;
+    }
+
+    event.preventDefault();
+    if (navigationStuck) return;
+    if (getTelemetryConsent() !== "accepted") {
+      setDemoMessage("Accept telemetry in Privacy settings before recording the demo.");
+      return;
+    }
+
+    setNavigationStuck(true);
+    setDemoMessage("");
+    await recordFaroNavigation("experience", "hero");
+    // Controlled local failure on a real interaction, not a discovered app bug.
+    // Faro captures console.error; preventDefault leaves the visitor on this section.
+    console.error(new Error("Talk demo: navigation to #experience failed"));
+  };
+
   return (
     <>
       <section className={section}>
@@ -70,13 +101,36 @@ export const Hero = () => {
             ))}
           </div>
           <div className={heroActions}>
-            <a className={primaryLink} href="#experience">
-              View experience
+            <a
+              className={primaryLink}
+              href="#experience"
+              data-faro-user-action-name="view-experience"
+              aria-disabled={navigationStuck || undefined}
+              aria-busy={navigationStuck || undefined}
+              onClick={(event) => void viewExperience(event)}
+            >
+              {navigationStuck ? "Opening experience…" : "View experience"}
             </a>
             <a className={secondaryLink} href={`mailto:${profile.email}`}>
               Get in touch
             </a>
           </div>
+          {simulateNavigationFailure && (
+            <div>
+              <p>Presentation simulation: View experience will get stuck.</p>
+              <button
+                className={resetDemoButton}
+                type="button"
+                onClick={() => {
+                  setNavigationStuck(false);
+                  setDemoMessage("");
+                }}
+              >
+                Reset navigation demo
+              </button>
+              <p role="status">{demoMessage}</p>
+            </div>
+          )}
         </header>
       </section>
       <Links />

@@ -1,5 +1,7 @@
 # OpenTelemetry Architecture Review
 
+> Historical OpenTelemetry route: the production website now selects consent-gated Grafana Faro Cloud. These instructions describe the earlier OTel/Tempo setup and are not the current production telemetry check.
+
 This repository is a Vite + React personal website with browser-side OpenTelemetry tracing and a Netlify Function that forwards traces to Grafana Cloud Tempo.
 
 The current implementation sends **traces only**. It does not configure OTel logs or OTel metrics. Web Vitals are represented as short spans so they can be queried in Tempo alongside page-load, click, and GitHub project-loading traces.

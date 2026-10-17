@@ -191,6 +191,9 @@ export const primaryLink = style({
   borderRadius: radii.sm,
   textDecoration: "none",
   fontWeight: typography.fontWeight.bold,
+  selectors: {
+    '&[aria-disabled="true"]': { opacity: 0.6, cursor: "not-allowed" },
+  },
 });
 
 export const secondaryLink = style({
@@ -205,3 +208,9 @@ export const secondaryLink = style({
   textDecoration: "none",
   fontWeight: typography.fontWeight.bold,
 });
+
+export const resetDemoButton = style([secondaryLink, {
+  backgroundColor: "transparent",
+  font: "inherit",
+  cursor: "pointer",
+}]);

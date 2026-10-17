@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { initTelemetry } from "../../telemetry";
+import { getObservabilityRoute, initObservability } from "../../observability";
 import {
   setTelemetryConsent,
   type TelemetryConsent as TelemetryPreference,
@@ -40,7 +40,7 @@ export function TelemetryConsent({
   const accept = () => {
     setTelemetryConsent("accepted");
     onPreferenceChange("accepted");
-    initTelemetry();
+    void initObservability().catch((error: unknown) => console.error("Observability failed to start", error));
     onClose();
   };
 
@@ -87,10 +87,22 @@ export function TelemetryConsent({
           )}
         </div>
         <p className={copy} id="telemetry-consent-description">
-          I use OpenTelemetry to understand how this website loads and how
-          visitors interact with it. If you accept, page performance,
-          navigation and click information is sent to Grafana Cloud. It is not
-          used for advertising, and declining will not affect the website.
+          {getObservabilityRoute() === "faro-oss" ? (
+            <>For this Faro talk demo, Faro records page performance, errors and
+            named actions after you opt in, then sends them to the Grafana Alloy
+            collector configured for this demo. Declining will not affect the
+            website.</>
+          ) : getObservabilityRoute() === "faro-cloud" ? (
+            <>I use Grafana Faro to understand this website's performance,
+            errors and navigation after you opt in. Faro sends this browser
+            information to Grafana Cloud. It is not used for advertising, and
+            declining will not affect the website.</>
+          ) : (
+            <>I use OpenTelemetry to understand how this website loads and how
+            visitors interact with it. If you accept, page performance,
+            navigation and click information is sent to Grafana Cloud. It is not
+            used for advertising, and declining will not affect the website.</>
+          )}
         </p>
         <div className={actions}>
           <button className={acceptButton} type="button" onClick={accept}>

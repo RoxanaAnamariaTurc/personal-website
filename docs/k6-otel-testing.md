@@ -1,5 +1,7 @@
 # k6 Testing For Frontend OpenTelemetry
 
+> Historical OpenTelemetry route: the production website now selects consent-gated Grafana Faro Cloud. These instructions describe the earlier OTel/Tempo setup and are not the current production telemetry check.
+
 This repo includes two k6 scripts:
 
 | Script | Command | What it tests |

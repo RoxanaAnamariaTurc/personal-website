@@ -124,3 +124,31 @@ globalStyle(`${skillList} li`, {
   padding: `${spacing[1]} ${spacing[2]}`,
   fontSize: typography.fontSize.sm,
 });
+
+export const demoCallout = style({
+  maxWidth: "1440px",
+  margin: `${spacing[5]} auto 0`,
+  padding: spacing[5],
+  border: `1px solid ${colors.border.subtle}`,
+  borderRadius: radii.md,
+  backgroundColor: colors.background.body,
+});
+
+export const demoButton = style({
+  padding: `${spacing[2]} ${spacing[4]}`,
+  border: `1px solid ${colors.accent.highlight}`,
+  borderRadius: radii.sm,
+  color: colors.text.primary,
+  backgroundColor: colors.background.surfaceAlt,
+  font: "inherit",
+  fontWeight: 700,
+  cursor: "pointer",
+  selectors: {
+    "&:focus-visible": { outline: `3px solid ${colors.accent.highlight}`, outlineOffset: "3px" },
+  },
+});
+
+export const demoStatus = style({
+  minHeight: "1.5em",
+  color: colors.text.muted,
+});

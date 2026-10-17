@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { getObservabilityRoute } from "../../../observability";
+import { getTelemetryConsent } from "../../../privacy/telemetryConsent";
 import {
   communityHighlights,
   skillGroups,
@@ -8,6 +11,9 @@ import {
   architectureStep,
   communityGrid,
   communityList,
+  demoButton,
+  demoCallout,
+  demoStatus,
   observabilityCard,
   observabilityContent,
   observabilitySection,
@@ -17,6 +23,27 @@ import {
 } from "./Observability.css";
 
 export const Observability = () => {
+  const observabilityRoute = getObservabilityRoute();
+  const isFaroDemo = observabilityRoute === "faro-oss";
+  const [demoMessage, setDemoMessage] = useState("");
+  const triggerDemoError = async () => {
+    if (getTelemetryConsent() !== "accepted") {
+      setDemoMessage("Accept optional telemetry first, then try again.");
+      return;
+    }
+
+    try {
+      const { recordTalkDemoError } = await import("../../../faro");
+      setDemoMessage(
+        recordTalkDemoError()
+          ? "Controlled error created. Check Alloy and Grafana Explore to confirm delivery."
+          : "Faro is still starting. Please try again.",
+      );
+    } catch {
+      setDemoMessage("The demo signal could not be created.");
+    }
+  };
+
   return (
     <section id="observability" className={observabilitySection}>
       <div className={observabilityContent}>
@@ -24,13 +51,35 @@ export const Observability = () => {
           <h2 className={sectionHeading}>Observability</h2>
         </div>
 
-        <div className={architecture} aria-label="OpenTelemetry architecture">
-          <span className={architectureStep}>Browser</span>
-          <span className={architectureStep}>OpenTelemetry</span>
-          <span className={architectureStep}>Netlify proxy</span>
-          <span className={architectureStep}>Grafana Tempo</span>
+        <div
+          className={architecture}
+          aria-label={isFaroDemo ? "Local Faro architecture" : observabilityRoute === "faro-cloud" ? "Grafana Cloud Faro architecture" : "OpenTelemetry architecture"}
+        >
+          {(isFaroDemo
+            ? ["Browser Faro SDK", "Alloy receiver", "Loki", "Grafana Explore"]
+            : observabilityRoute === "faro-cloud"
+              ? ["Browser", "Grafana Faro", "Grafana Cloud", "Frontend Observability"]
+              : ["Browser", "OpenTelemetry", "Netlify proxy", "Grafana Tempo"]
+          ).map((step) => (
+            <span className={architectureStep} key={step}>{step}</span>
+          ))}
         </div>
       </div>
+
+      {isFaroDemo && (
+        <div className={demoCallout}>
+          <p>Local talk demo: this button creates a controlled test error.</p>
+          <button
+            className={demoButton}
+            type="button"
+            data-faro-user-action-name="create-demo-error"
+            onClick={() => void triggerDemoError()}
+          >
+            Create demo error
+          </button>
+          <p className={demoStatus} role="status">{demoMessage}</p>
+        </div>
+      )}
 
       <div className={communityGrid}>
         <article className={observabilityCard}>
